@@ -1,0 +1,95 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * A module to add a publish date to a node and publish that node if the publish date is in the past.
+ */
+
+// // deze functie kan misschien overgeslagen worden omdat datetime al bestaat
+// function pubdate_field_info() {
+	// return array(
+		// 'dimensions' => array(
+			// 'label' => t('publicatie datum'), // is the label visibile in forms
+			// 'description' => t('some kind date field'), // description visibile in forms
+			// //'settings' => array('num_dimensions' => 2), // kan ik weg laten omdat het bij mijn veld geen comma getal betreft
+			// // 'instance_settings' => array(
+				// // 'max_height' => 0,
+				// // 'max_width' => 0,
+				// // 'max_depth' => 0,
+			// // ),
+			// 'default_wiget' => 'pubdate_combined', // use datetime?
+			// 'default_formatter' => 'pubdate_default', // datetime?
+		// ),
+	// );
+// }
+
+/**
+ * Implements hook_form_alter().
+ */
+function pubdate_form_alter(&$form, $form_state, $form_id) {
+  		//dsm($form_id);
+  	if($form_id == "nieuws_node_form") {
+  		//drupal_set_message("Form ID is: " . $form_id);
+  		$form['options']['pubdate'] = array(
+			'#type' => 'date',
+			'#title' => t('Publish date'),
+			'#description' => t('the date this will be published'),
+		);
+		
+		$form['#submit'] = array('pubdate_custom_form_submit');
+  	}
+}
+
+/**
+ * Implements hook_node_insert()
+ */
+function pubdate_node_insert($node) {
+	//dsm($node);
+	
+	$date_arr = $node->pubdate;
+	if ($date_arr['year'] && $date_arr['month'] && $date_arr['day']) {
+  		$date = new DateTime();
+  		$date->setDate($date_arr['year'], $date_arr['month'], $date_arr['day']);
+		
+		db_insert('pubdate')
+		  ->fields(array(
+		    'nid' => $node->nid,
+		    'publish_after' => $date->getTimestamp(),
+		  ))
+		  ->execute();
+	} // if not defined do nothing
+}
+
+/**
+ * Implements hook_node_update()
+ */
+function pubdate_node_update($node) {
+	$date_arr = $node->pubdate;
+	if ($date_arr['year'] && $date_arr['month'] && $date_arr['day']) {
+  		$date = new DateTime();
+  		$date->setDate($date_arr['year'], $date_arr['month'], $date_arr['day']);
+		
+		db_update('pubdate')
+		  ->fields(array('publish_after' => $date->getTimestamp() ))
+		  ->condition('nid', $node->nid)
+		  ->execute();
+	} // if not defined do nothing
+}
+
+/**
+ * Implements hook_node_load()
+ */
+function pubdate_node_load($nodes, $types) {
+	//debug($nodes);
+	
+	// $result = db_query('SELECT nid, publish_after FROM {pubdate} WHERE nid == :nids', array(':nids', $nid));
+	// foreach($result )
+}
+
+// /**
+ // * submit handler for pupdate_form_alter()
+ // */
+// function pubdate_custom_form_submit($form, &$form_state) {
+// 
+// }

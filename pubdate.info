@@ -1,0 +1,8 @@
+name = Pubdate
+description = set publish date for nodes.
+package = jbbi
+core = 7.x
+files[] = pubdate.module
+files[] = pubdate.install
+
+version = "7.x-0.1"

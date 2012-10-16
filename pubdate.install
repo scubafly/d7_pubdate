@@ -1,0 +1,66 @@
+<?
+// $Id$
+
+/**
+ * @file
+ * install script
+ * 
+ * TODO add weight to terms
+ */
+
+
+/**
+ * Implements hook_enable 
+ * runs every time this module is enabled, to run only at install use hook_install 
+ * but once the module has been enabled ( even only once ) hook_install won't be called anymore.
+ * 
+ * for testing using the pro durpal 7 dev book page 181:
+ * 	- add body field
+ * 	- config the body field
+ *  - create company field
+ */
+/*
+function pubdate_enable(){
+	// array of vacabularies
+	node_types_rebuild();
+	$types = node_type_get_types();
+	node_add_body_field($types['pubdate']);
+	
+	$body_instance = field_info_instance('node', 'body', 'pubdate');
+	
+	$body_instance['type'] = 'text_summar_or_trimmed'; //datetime?
+	
+	//field_update_instance($body_instance);
+	
+	//foreach()
+}
+ */
+ 
+/**
+ * Implements hook_schema().
+ */
+function pubdate_schema() {
+	$schema['pubdate'] = array(
+		'description' => 'some description...',
+		'fields' => array(
+			'nid' => array(
+				'description' => 'Node id of the node duh!',
+				'type' => 'int',
+				'not null' => TRUE,
+				'default' => 0,
+			),
+			'publish_after' => array(
+				'description' => 'The timestamp after which the node can be published',
+				'type' => 'int',
+				'not null' => 'TRUE',
+				'default' => 0,
+			),
+		),
+		'indexes' => array(
+			'publish_after' => array('publish_after'),
+		),
+		'primary key' => array('nid'),
+	);
+	
+	return $schema;
+}
